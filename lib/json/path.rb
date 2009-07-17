@@ -95,10 +95,20 @@ module JSON
     
     class FilterNode < Treetop::Runtime::SyntaxNode
       
+      class Error < ::ArgumentError; end
+      
       def descend(*objects)
-        code = template_code.text_value.gsub('@', 'obj')
-        objects.select do |obj|
-          eval(code, binding)
+        code = template_code.text_value.gsub('@', '(obj)').gsub('\\(obj)', '@')
+        objects.inject([]) do |results, set|
+          unless set.is_a?(Array)
+            raise Error, "Filters only work on arrays"
+          end
+          set.each do |obj|
+            if eval(code, binding)
+              results << obj
+            end
+          end
+          results
         end
       end
     

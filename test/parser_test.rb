@@ -136,11 +136,11 @@ class ParserTest < Test::Unit::TestCase
       end
       context "when using self-contained single statements" do
         should "support simple object operations" do
-          path = '$.*[?(@ % 2 == 0)]'
+          path = '$[?(@ % 2 == 0)]'
           assert_resolves(@numbers, path, [2, 4, 6, 8])
         end
         should "support manual object pathing" do
-          path = %($.*[?(@['age'] % 2 == 0)].name)
+          path = %($[?(@['age'] % 2 == 0)].name)
           assert_resolves(@hashes, path, ["Jamis"])
         end
       end
