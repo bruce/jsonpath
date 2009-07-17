@@ -78,6 +78,40 @@ module JSONPathGrammar
     return r0
   end
 
+  def _nt_number
+    start_index = index
+    if node_cache[:number].has_key?(index)
+      cached = node_cache[:number][index]
+      @index = cached.interval.end if cached
+      return cached
+    end
+
+    s0, i0 = [], index
+    loop do
+      if input.index(Regexp.new('[0-9]'), index) == index
+        r1 = instantiate_node(SyntaxNode,input, index...(index + 1))
+        @index += 1
+      else
+        r1 = nil
+      end
+      if r1
+        s0 << r1
+      else
+        break
+      end
+    end
+    if s0.empty?
+      self.index = i0
+      r0 = nil
+    else
+      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+    end
+
+    node_cache[:number][start_index] = r0
+
+    return r0
+  end
+
   module Wildcard0
   end
 
@@ -251,9 +285,16 @@ module JSONPathGrammar
   end
 
   module Child5
+    def index
+      elements[1]
+    end
+
   end
 
   module Child6
+  end
+
+  module Child7
     def key
       elements[2]
     end
@@ -447,88 +488,22 @@ module JSONPathGrammar
             end
             s20 << r21
             if r21
-              if input.index('\'', index) == index
-                r22 = instantiate_node(SyntaxNode,input, index...(index + 1))
-                @index += 1
-              else
-                terminal_parse_failure('\'')
-                r22 = nil
-              end
+              r22 = _nt_number
               s20 << r22
               if r22
-                s23, i23 = [], index
-                loop do
-                  i24, s24 = index, []
-                  i25 = index
-                  if input.index('\'', index) == index
-                    r26 = instantiate_node(SyntaxNode,input, index...(index + 1))
-                    @index += 1
-                  else
-                    terminal_parse_failure('\'')
-                    r26 = nil
-                  end
-                  if r26
-                    r25 = nil
-                  else
-                    self.index = i25
-                    r25 = instantiate_node(SyntaxNode,input, index...index)
-                  end
-                  s24 << r25
-                  if r25
-                    if index < input_length
-                      r27 = instantiate_node(SyntaxNode,input, index...(index + 1))
-                      @index += 1
-                    else
-                      terminal_parse_failure("any character")
-                      r27 = nil
-                    end
-                    s24 << r27
-                  end
-                  if s24.last
-                    r24 = instantiate_node(SyntaxNode,input, i24...index, s24)
-                    r24.extend(Child5)
-                  else
-                    self.index = i24
-                    r24 = nil
-                  end
-                  if r24
-                    s23 << r24
-                  else
-                    break
-                  end
-                end
-                if s23.empty?
-                  self.index = i23
-                  r23 = nil
+                if input.index(']', index) == index
+                  r23 = instantiate_node(SyntaxNode,input, index...(index + 1))
+                  @index += 1
                 else
-                  r23 = instantiate_node(SyntaxNode,input, i23...index, s23)
+                  terminal_parse_failure(']')
+                  r23 = nil
                 end
                 s20 << r23
-                if r23
-                  if input.index('\'', index) == index
-                    r28 = instantiate_node(SyntaxNode,input, index...(index + 1))
-                    @index += 1
-                  else
-                    terminal_parse_failure('\'')
-                    r28 = nil
-                  end
-                  s20 << r28
-                  if r28
-                    if input.index(']', index) == index
-                      r29 = instantiate_node(SyntaxNode,input, index...(index + 1))
-                      @index += 1
-                    else
-                      terminal_parse_failure(']')
-                      r29 = nil
-                    end
-                    s20 << r29
-                  end
-                end
               end
             end
             if s20.last
-              r20 = instantiate_node(JSON::Path::KeyNode,input, i20...index, s20)
-              r20.extend(Child6)
+              r20 = instantiate_node(JSON::Path::IndexNode,input, i20...index, s20)
+              r20.extend(Child5)
             else
               self.index = i20
               r20 = nil
@@ -536,8 +511,108 @@ module JSONPathGrammar
             if r20
               r0 = r20
             else
-              self.index = i0
-              r0 = nil
+              i24, s24 = index, []
+              if input.index('[', index) == index
+                r25 = instantiate_node(SyntaxNode,input, index...(index + 1))
+                @index += 1
+              else
+                terminal_parse_failure('[')
+                r25 = nil
+              end
+              s24 << r25
+              if r25
+                if input.index('\'', index) == index
+                  r26 = instantiate_node(SyntaxNode,input, index...(index + 1))
+                  @index += 1
+                else
+                  terminal_parse_failure('\'')
+                  r26 = nil
+                end
+                s24 << r26
+                if r26
+                  s27, i27 = [], index
+                  loop do
+                    i28, s28 = index, []
+                    i29 = index
+                    if input.index('\'', index) == index
+                      r30 = instantiate_node(SyntaxNode,input, index...(index + 1))
+                      @index += 1
+                    else
+                      terminal_parse_failure('\'')
+                      r30 = nil
+                    end
+                    if r30
+                      r29 = nil
+                    else
+                      self.index = i29
+                      r29 = instantiate_node(SyntaxNode,input, index...index)
+                    end
+                    s28 << r29
+                    if r29
+                      if index < input_length
+                        r31 = instantiate_node(SyntaxNode,input, index...(index + 1))
+                        @index += 1
+                      else
+                        terminal_parse_failure("any character")
+                        r31 = nil
+                      end
+                      s28 << r31
+                    end
+                    if s28.last
+                      r28 = instantiate_node(SyntaxNode,input, i28...index, s28)
+                      r28.extend(Child6)
+                    else
+                      self.index = i28
+                      r28 = nil
+                    end
+                    if r28
+                      s27 << r28
+                    else
+                      break
+                    end
+                  end
+                  if s27.empty?
+                    self.index = i27
+                    r27 = nil
+                  else
+                    r27 = instantiate_node(SyntaxNode,input, i27...index, s27)
+                  end
+                  s24 << r27
+                  if r27
+                    if input.index('\'', index) == index
+                      r32 = instantiate_node(SyntaxNode,input, index...(index + 1))
+                      @index += 1
+                    else
+                      terminal_parse_failure('\'')
+                      r32 = nil
+                    end
+                    s24 << r32
+                    if r32
+                      if input.index(']', index) == index
+                        r33 = instantiate_node(SyntaxNode,input, index...(index + 1))
+                        @index += 1
+                      else
+                        terminal_parse_failure(']')
+                        r33 = nil
+                      end
+                      s24 << r33
+                    end
+                  end
+                end
+              end
+              if s24.last
+                r24 = instantiate_node(JSON::Path::KeyNode,input, i24...index, s24)
+                r24.extend(Child7)
+              else
+                self.index = i24
+                r24 = nil
+              end
+              if r24
+                r0 = r24
+              else
+                self.index = i0
+                r0 = nil
+              end
             end
           end
         end

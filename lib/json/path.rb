@@ -46,6 +46,18 @@ module JSON
       end
     end
     
+    class IndexNode < Treetop::Runtime::SyntaxNode
+      def descend(*objects)
+        offset = Integer(index.text_value)
+        objects.inject([]) do |results, obj|
+          if obj.size > offset
+            results << obj[offset]
+          end
+          results
+        end
+      end
+    end
+    
   end
   
 end

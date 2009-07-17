@@ -8,6 +8,10 @@ grammar JSONPathGrammar
     '$'
   end
   
+  rule number
+    [0-9]+
+  end
+  
   rule wildcard
     '*' / '\'' '*' '\''
   end
@@ -32,6 +36,9 @@ grammar JSONPathGrammar
     /
     # [*] and ['*']
     '[' wildcard ']' <JSON::Path::WildcardNode>
+    /
+    # [0]
+    '[' index:number ']' <JSON::Path::IndexNode>
     /
     # ['foo']
     '[' '\'' key:(!'\'' . )+ '\'' ']' <JSON::Path::KeyNode>

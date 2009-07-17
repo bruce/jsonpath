@@ -63,11 +63,27 @@ class ParserTest < Test::Unit::TestCase
         {"names" => %w(spam eggs)}
       ], path, %w(foo bar baz quux spam eggs))
     end
-    should "parses quoted key outside of brackets" do
+    should "parse quoted key outside of brackets" do
       path = "$.'a b'"
       assert_parses path
       assert_kind_of Proc, parse(path).to_proc
       assert_resolves({"a b" => 1}, path, [1])
+    end
+    should "parse index to single terminal" do
+      path = "$[1]"
+      assert_parses path
+      assert_kind_of Proc, parse(path).to_proc
+      assert_resolves(%w(foo bar baz), path, %w(bar))
+    end
+    should "parse index to multiple terminals" do
+      path = "$.*[1].name"
+      assert_parses path
+      assert_kind_of Proc, parse(path).to_proc
+      assert_resolves({
+        "a" => [1, {"name" => 2}, 3],
+        "b" => [4, {"name" => 5}, 6],
+        "c" => [7, {"name" => 8}, 9],
+      }, path, [2, 5, 8])
     end
     
   end
