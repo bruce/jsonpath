@@ -74,7 +74,8 @@ class ReferenceTest < Test::Unit::TestCase
       assert_resolves(object, "$.menu.items[?(@ && @['label'] && @['label'] =~ /SVG/)].id", ["CopySVG", "ViewSVG"])
     end
     should 'resolve on negative' do
-      assert_resolves(object, "$.menu.items[?(!@)]", [])
+      # !nil == true in Ruby
+      assert_resolves(object, "$.menu.items[?(!@)]", [nil, nil, nil, nil])
     end
     should 'resolve descendant with number in brackets' do
       assert_resolves(object, "$..[0]", [{"id" => "Open"}])
