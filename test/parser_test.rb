@@ -12,13 +12,13 @@ class ParserTest < Test::Unit::TestCase
       assert_resolves({"a" => 1}, '$.a', [1])
     end
     should "parse subscript with quotes successfully" do
-      path = "$.['a b']"
+      path = "$['a b']"
       assert_parses path
       assert_kind_of Proc, parse(path).to_proc
       assert_resolves({"a b" => 1}, path, [1])
     end
     should "parse simple chained selectors with one terminal" do
-      path = "$.['a b'].c"
+      path = "$['a b'].c"
       assert_parses path
       assert_kind_of Proc, parse(path).to_proc
       assert_resolves({"a b" => {"c" => 1}}, path, [1])
@@ -31,6 +31,18 @@ class ParserTest < Test::Unit::TestCase
     end
     should "parses bare wildcard on array" do
       path = "$.*"
+      assert_parses path
+      assert_kind_of Proc, parse(path).to_proc
+      assert_resolves([1, 2, 3], path, [1, 2, 3])
+    end
+    should "parses quoted wildcard on hash" do
+      path = "$['*']"
+      assert_parses path
+      assert_kind_of Proc, parse(path).to_proc
+      assert_resolves({"a" => 1, "b" => 2}, path, [1, 2])
+    end
+    should "parses quoted wildcard on array" do
+      path = "$['*']"
       assert_parses path
       assert_kind_of Proc, parse(path).to_proc
       assert_resolves([1, 2, 3], path, [1, 2, 3])
@@ -50,6 +62,12 @@ class ParserTest < Test::Unit::TestCase
         {"names" => %w(baz quux)},
         {"names" => %w(spam eggs)}
       ], path, %w(foo bar baz quux spam eggs))
+    end
+    should "parses quoted key outside of brackets" do
+      path = "$.'a b'"
+      assert_parses path
+      assert_kind_of Proc, parse(path).to_proc
+      assert_resolves({"a b" => 1}, path, [1])
     end
     
   end

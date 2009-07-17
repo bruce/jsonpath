@@ -1,15 +1,7 @@
 grammar JSONPathGrammar
 
   rule path
-    root selectors:child+ {
-      def to_proc
-        lambda do |object|
-          selectors.elements.inject([object]) do |reduce, selector|
-            selector.descend(*reduce)
-          end
-        end
-      end
-    }
+    root selectors:child+ <JSON::Path::RootNode>
   end
 
   rule root
@@ -17,7 +9,7 @@ grammar JSONPathGrammar
   end
   
   rule wildcard
-    '*'
+    '*' / '\'' '*' '\''
   end
   
   rule subscript
@@ -29,38 +21,23 @@ grammar JSONPathGrammar
   end
   
   rule child
-    '.' word {
-      def descend(*objects)
-        objects.map do |obj|
-          obj[word.text_value]
-        end
-      end
-    }
+    # .foo
+    '.' key:bareword <JSON::Path::KeyNode>
     /
-    '.' '[' '\'' phrase:(!'\'' . )+ '\'' ']' {
-      def descend(*objects)
-        objects.map do |obj|
-          obj[phrase.text_value]
-        end
-      end
-    }
+    # .*
+    '.' wildcard <JSON::Path::WildcardNode>
     /
-    '.' wildcard {
-      def descend(*objects)
-        objects.inject([]) do |results, obj|
-          values = case obj
-          when Hash
-            obj.values
-          when Array
-            obj
-          end
-          results.push(*values)
-        end
-      end
-    }
+    # .'foo'
+    '.' '\'' key:(!'\'' . )+ '\'' <JSON::Path::KeyNode>
+    /
+    # [*] and ['*']
+    '[' wildcard ']' <JSON::Path::WildcardNode>
+    /
+    # ['foo']
+    '[' '\'' key:(!'\'' . )+ '\'' ']' <JSON::Path::KeyNode>
   end
   
-  rule word
+  rule bareword
     [a-zA-Z0-9]+
   end
 
