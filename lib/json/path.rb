@@ -70,6 +70,11 @@ module JSON
             next
           end
           results.push(*values)
+          # Note: I really don't like this special case.  This happens
+          # because when wildcarding regularly, the results are the *children*,
+          # but when using a .. descendant selector, you want the main parent,
+          # too.  According to the JSONPath docs, '$..*' means "All members of
+          # [the] JSON structure."  Should this support Array, as well?
           if obj.is_a?(Hash) && traversing_descendants?
             results.push(obj) unless results.include?(obj)
           end
