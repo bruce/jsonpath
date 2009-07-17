@@ -160,6 +160,15 @@ class ParserTest < Test::Unit::TestCase
         path = '$..*'
         assert_resolves(@object, path, [[1, 2, [3, 4]], 1, 2, [3, 4], 3, 4, {"c" => 5, "e" => [6, 7]}, 5, [6, 7], 6, 7, @object])
       end
+      should "be found with deeper key" do
+        path = '$..e'
+        assert_resolves(@object, path, [[6, 7]])
+      end
+      should "resolve deeper chained selectors" do
+        path = '$..e[?(@ % 2 == 0)]'
+        assert_resolves(@object, path, [6])
+      end
+      
     end
     
   end

@@ -60,6 +60,8 @@ module JSON
             obj.values
           when Array
             obj
+          else
+            next
           end
           results.push(*values)
         end
@@ -70,8 +72,13 @@ module JSON
     class KeyNode < PathNode
       def descend(*objects)
         results = []
+        value = key.text_value
         traverse(objects) do |obj|
-          results << obj[key.text_value]
+          if obj.is_a?(Hash)
+            if obj.key?(value)
+              results << obj[value]
+            end
+          end
         end
         results
       end
@@ -82,8 +89,10 @@ module JSON
         offset = Integer(index.text_value)
         results = []
         traverse(objects) do |obj|
-          if obj.size > offset
-            results << obj[offset]
+          if obj.is_a?(Array)
+            if obj.size > offset
+              results << obj[offset]
+            end
           end
         end
         results
@@ -95,9 +104,11 @@ module JSON
       def descend(*objects)
         results = []
         traverse(objects) do |obj|
-          (start_offset..stop_offset(obj)).step(step_size) do |n|
-            if obj.size > n
-              results << obj[n]
+          if obj.is_a?(Array)
+            (start_offset..stop_offset(obj)).step(step_size) do |n|
+              if obj.size > n
+                results << obj[n]
+              end
             end
           end
         end
@@ -126,13 +137,33 @@ module JSON
       
     end
     
-    class ExprNode < PathNode
+    class CodeNode < PathNode
+      
+      def code
+        @code ||= begin
+          text = template_code.text_value
+          text.gsub('@', '(obj)').gsub('\\(obj)', '@')
+        end
+      end
+      
+      def execute(obj)
+        eval(code, binding)
+      end
+      
+    end
+    
+    class ExprNode < CodeNode
             
       def descend(*objects)
-        code = template_code.text_value.gsub('@', '(obj)').gsub('\\(obj)', '@')
         results = []
         traverse(objects) do |obj|
-          res = eval(code, binding)
+          res = execute[obj]
+          case obj
+          when Hash
+            next unless obj.key?(res)
+          when Array
+            next unless obj.size > res
+          end
           results << obj[res]
         end
         results
@@ -140,12 +171,11 @@ module JSON
     
     end
     
-    class FilterNode < PathNode
+    class FilterNode < CodeNode
       
       class Error < ::ArgumentError; end
       
       def descend(*objects)
-        code = template_code.text_value.gsub('@', '(obj)').gsub('\\(obj)', '@')
         results = []
         traverse(objects) do |set|
           unless set.is_a?(Array) || set.is_a?(Hash)
@@ -153,7 +183,7 @@ module JSON
           end
           values = set.is_a?(Array) ? set : set.values
           values.each do |obj|
-            if eval(code, binding)
+            if execute(obj)
               results << obj
             end
           end
