@@ -17,7 +17,11 @@ grammar JSONPathGrammar
   end
   
   rule lower
-    '..' / '.'
+    descendant / '.'
+  end
+  
+  rule descendant
+    '..'
   end
   
   rule child

@@ -219,13 +219,7 @@ module JSONPathGrammar
     end
 
     i0 = index
-    if input.index('..', index) == index
-      r1 = instantiate_node(SyntaxNode,input, index...(index + 2))
-      @index += 2
-    else
-      terminal_parse_failure('..')
-      r1 = nil
-    end
+    r1 = _nt_descendant
     if r1
       r0 = r1
     else
@@ -245,6 +239,27 @@ module JSONPathGrammar
     end
 
     node_cache[:lower][start_index] = r0
+
+    return r0
+  end
+
+  def _nt_descendant
+    start_index = index
+    if node_cache[:descendant].has_key?(index)
+      cached = node_cache[:descendant][index]
+      @index = cached.interval.end if cached
+      return cached
+    end
+
+    if input.index('..', index) == index
+      r0 = instantiate_node(SyntaxNode,input, index...(index + 2))
+      @index += 2
+    else
+      terminal_parse_failure('..')
+      r0 = nil
+    end
+
+    node_cache[:descendant][start_index] = r0
 
     return r0
   end
