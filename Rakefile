@@ -30,6 +30,7 @@ begin
     test.libs << 'test'
     test.pattern = 'test/**/*_test.rb'
     test.verbose = true
+    test.rcov_opts << '--exclude gems'
   end
 rescue LoadError
   task :rcov do

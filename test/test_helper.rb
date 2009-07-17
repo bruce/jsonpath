@@ -25,7 +25,13 @@ class Test::Unit::TestCase
   
   def assert_resolves(obj, path, result)
     assert_parses path
-    assert_equal result.sort, parse(path).to_proc.call(obj).sort
+    assert_equal safe_sort(result), safe_sort(parse(path).to_proc.call(obj))
+  end
+  
+  def safe_sort(objs)
+    objs.sort_by do |obj|
+      obj ? obj.to_s : 0.to_s
+    end
   end
   
 end

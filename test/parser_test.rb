@@ -146,6 +146,21 @@ class ParserTest < Test::Unit::TestCase
       end
       
     end
+    context "descendants" do
+      setup do
+        @object = {
+          "a" => [1, 2, [3, 4]],
+          "b" => {
+            "c" => 5,
+            "e" => [6, 7]
+          }
+        }
+      end
+      should "be found with wildcard" do
+        path = '$..*'
+        assert_resolves(@object, path, [[1, 2, [3, 4]], 1, 2, [3, 4], 3, 4, {"c" => 5, "e" => [6, 7]}, 5, [6, 7], 6, 7, @object])
+      end
+    end
     
   end
     

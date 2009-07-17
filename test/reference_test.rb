@@ -95,7 +95,7 @@ class ReferenceTest < Test::Unit::TestCase
   context 'Sample 6' do
     setup { @json = %({"lin":{"color":"red","x":2,"y":3},"cir":{"color":"blue","x":5,"y":2,"r":1},"arc":{"color":"green","x":2,"y":4,"r":2,"phi0":30,"dphi":120},"pnt":{"x":0,"y":7}}) }
     should 'resolve by operation in quotes' do
-      assert_resolves(object, "$.'?(@['color'])'.x", [])
+      assert_resolves(object, "$.'?(@['color'])'.x", [2, 5, 2])
     end
     should 'resolve by multiple quoted values in brackets' do
       assert_resolves(object, "$['lin','cir'].color", ["red", "blue"])
@@ -103,10 +103,10 @@ class ReferenceTest < Test::Unit::TestCase
   end
   context 'Sample 7' do
     setup { @json = %({"text":["hello", "world2.0"]}) }
-    should 'resolve correctly' do
+    should 'resolve correctly filter 1' do
       assert_resolves(object, "$.text[?(@.length > 5)]", ["world2.0"])
     end
-    should 'resolve correctly' do
+    should 'resolve correctly filter 2' do
       assert_resolves(object, "$.text[?(@[0, 1] == 'h')]", ["hello"])
     end
   end

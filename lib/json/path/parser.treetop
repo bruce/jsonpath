@@ -24,18 +24,22 @@ grammar JSONPathGrammar
     'x'
   end
   
+  rule lower
+   '.' / '..'
+  end
+  
   rule child
     # .foo
-    '.' key:bareword <JSON::Path::KeyNode>
+    lower key:bareword <JSON::Path::KeyNode>
     /
     # .*
-    '.' wildcard <JSON::Path::WildcardNode>
+    lower wildcard <JSON::Path::WildcardNode>
     /
     # '?(@ % 2 == 0)'
-    '.\'?(' template_code:(!')\'' . )+ ')\'' <JSON::Path::FilterNode>
+    lower '\'?(' template_code:(!')\'' . )+ ')\'' <JSON::Path::FilterNode>
     /
     # .'foo'
-    '.' '\'' key:(!'\'' . )+ '\'' <JSON::Path::KeyNode>
+    lower '\'' key:(!'\'' . )+ '\'' <JSON::Path::KeyNode>
     /
     # [*] and ['*']
     '[' wildcard ']' <JSON::Path::WildcardNode>
@@ -54,6 +58,9 @@ grammar JSONPathGrammar
     /
     # [1::2]
     '[' start:number '::' step:number ']' <JSON::Path::SliceNode>
+    /
+    # [(@.length - 1)]
+    '[(' template_code:(!')]' . )+ ')]' <JSON::Path::ExprNode>
     /
     # [?(@ % 2 == 0)]
     '[?(' template_code:(!')]' . )+ ')]' <JSON::Path::FilterNode>

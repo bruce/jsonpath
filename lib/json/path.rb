@@ -24,9 +24,18 @@ module JSON
       end
     end
     
-    class WildcardNode < Treetop::Runtime::SyntaxNode
+    class PathNode < Treetop::Runtime::SyntaxNode
+      
+      def traverse(obj, &block)
+        obj.each(&block)
+      end
+      
+    end
+    
+    class WildcardNode < PathNode
       def descend(*objects)
-        objects.inject([]) do |results, obj|
+        results = []
+        traverse(objects) do |obj|
           values = case obj
           when Hash
             obj.values
@@ -35,10 +44,11 @@ module JSON
           end
           results.push(*values)
         end
+        results
       end
     end
     
-    class KeyNode < Treetop::Runtime::SyntaxNode
+    class KeyNode < PathNode
       def descend(*objects)
         objects.map do |obj|
           obj[key.text_value]
@@ -46,7 +56,7 @@ module JSON
       end
     end
     
-    class IndexNode < Treetop::Runtime::SyntaxNode
+    class IndexNode < PathNode
       def descend(*objects)
         offset = Integer(index.text_value)
         objects.inject([]) do |results, obj|
@@ -58,7 +68,7 @@ module JSON
       end
     end
     
-    class SliceNode < Treetop::Runtime::SyntaxNode
+    class SliceNode < PathNode
             
       def descend(*objects)
         objects.inject([]) do |results, obj|
@@ -93,17 +103,30 @@ module JSON
       
     end
     
-    class FilterNode < Treetop::Runtime::SyntaxNode
+    class ExprNode < PathNode
+            
+      def descend(*objects)
+        code = template_code.text_value.gsub('@', '(obj)').gsub('\\(obj)', '@')
+        objects.map do |obj|
+          result = eval(code, binding)
+          obj[result]
+        end
+      end
+    
+    end
+    
+    class FilterNode < PathNode
       
       class Error < ::ArgumentError; end
       
       def descend(*objects)
         code = template_code.text_value.gsub('@', '(obj)').gsub('\\(obj)', '@')
         objects.inject([]) do |results, set|
-          unless set.is_a?(Array)
-            raise Error, "Filters only work on arrays"
+          unless set.is_a?(Array) || set.is_a?(Hash)
+            raise Error, "Filters only work on arrays and hashes"
           end
-          set.each do |obj|
+          values = set.is_a?(Array) ? set : set.values
+          values.each do |obj|
             if eval(code, binding)
               results << obj
             end
