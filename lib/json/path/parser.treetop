@@ -24,6 +24,16 @@ grammar JSONPathGrammar
     '..'
   end
   
+  rule word_list
+    quoted_word ',' ' '*  word_list
+    /
+    quoted_word
+  end
+  
+  rule quoted_word
+    '\'' key:(!'\'' . )+ '\''
+  end
+  
   rule child
     # .foo or ..foo
     lower key:bareword <JSON::Path::KeyNode>
@@ -83,10 +93,10 @@ grammar JSONPathGrammar
     lower '[?(' template_code:(!')]' . )+ ')]' <JSON::Path::FilterNode>
     /    
     # ['foo']
-    '[' '\'' key:(!'\'' . )+ '\'' ']' <JSON::Path::KeyNode>
+    '[' word_list ']' <JSON::Path::KeyNode>
     /    
     # .['foo'] and ..['foo]
-    lower '[' '\'' key:(!'\'' . )+ '\'' ']' <JSON::Path::KeyNode>
+    lower '[' word_list ']' <JSON::Path::KeyNode>
   end
   
   rule bareword

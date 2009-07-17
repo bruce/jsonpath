@@ -84,13 +84,29 @@ module JSON
     end
     
     class KeyNode < PathNode
+      
+      # supports finding the key from self or child elements
+      def find_keys(node=self, results=[], checked=[])
+        if node.respond_to?(:key)
+          results << node.key.text_value
+        end
+        if node.elements && !node.elements.empty?
+          node.elements.each do |element|
+            find_keys(element, results)
+          end
+        end
+        results
+      end
+            
       def descend(*objects)
         results = []
-        value = key.text_value
+        keys = find_keys
         traverse(objects) do |obj|
           if obj.is_a?(Hash)
-            if obj.key?(value)
-              results << obj[value]
+            keys.each do |key|
+              if obj.key?(key)
+                results << obj[key]
+              end
             end
           end
         end
