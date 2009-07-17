@@ -183,78 +183,6 @@ module JSONPathGrammar
     return r0
   end
 
-  module Subscript0
-    def term
-      elements[1]
-    end
-
-  end
-
-  def _nt_subscript
-    start_index = index
-    if node_cache[:subscript].has_key?(index)
-      cached = node_cache[:subscript][index]
-      @index = cached.interval.end if cached
-      return cached
-    end
-
-    i0, s0 = index, []
-    if input.index('[', index) == index
-      r1 = instantiate_node(SyntaxNode,input, index...(index + 1))
-      @index += 1
-    else
-      terminal_parse_failure('[')
-      r1 = nil
-    end
-    s0 << r1
-    if r1
-      r2 = _nt_term
-      s0 << r2
-      if r2
-        if input.index(']', index) == index
-          r3 = instantiate_node(SyntaxNode,input, index...(index + 1))
-          @index += 1
-        else
-          terminal_parse_failure(']')
-          r3 = nil
-        end
-        s0 << r3
-      end
-    end
-    if s0.last
-      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
-      r0.extend(Subscript0)
-    else
-      self.index = i0
-      r0 = nil
-    end
-
-    node_cache[:subscript][start_index] = r0
-
-    return r0
-  end
-
-  def _nt_term
-    start_index = index
-    if node_cache[:term].has_key?(index)
-      cached = node_cache[:term][index]
-      @index = cached.interval.end if cached
-      return cached
-    end
-
-    if input.index('x', index) == index
-      r0 = instantiate_node(SyntaxNode,input, index...(index + 1))
-      @index += 1
-    else
-      terminal_parse_failure('x')
-      r0 = nil
-    end
-
-    node_cache[:term][start_index] = r0
-
-    return r0
-  end
-
   def _nt_lower
     start_index = index
     if node_cache[:lower].has_key?(index)
@@ -264,21 +192,21 @@ module JSONPathGrammar
     end
 
     i0 = index
-    if input.index('.', index) == index
-      r1 = instantiate_node(SyntaxNode,input, index...(index + 1))
-      @index += 1
+    if input.index('..', index) == index
+      r1 = instantiate_node(SyntaxNode,input, index...(index + 2))
+      @index += 2
     else
-      terminal_parse_failure('.')
+      terminal_parse_failure('..')
       r1 = nil
     end
     if r1
       r0 = r1
     else
-      if input.index('..', index) == index
-        r2 = instantiate_node(SyntaxNode,input, index...(index + 2))
-        @index += 2
+      if input.index('.', index) == index
+        r2 = instantiate_node(SyntaxNode,input, index...(index + 1))
+        @index += 1
       else
-        terminal_parse_failure('..')
+        terminal_parse_failure('.')
         r2 = nil
       end
       if r2

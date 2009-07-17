@@ -27,7 +27,26 @@ module JSON
     class PathNode < Treetop::Runtime::SyntaxNode
       
       def traverse(obj, &block)
-        obj.each(&block)
+        if !respond_to?(:lower) || lower.text_value == '.'
+          obj.each(&block)
+        elsif lower.text_value == '..'
+          recurse(obj, &block)
+        end
+      end
+      
+      def recurse(obj, &block)
+        block.call(obj)
+        children = case obj
+        when Hash
+          obj.values
+        when Array
+          obj
+        else
+          return
+        end
+        children.each do |child|
+          recurse(child, &block)
+        end
       end
       
     end
@@ -50,35 +69,39 @@ module JSON
     
     class KeyNode < PathNode
       def descend(*objects)
-        objects.map do |obj|
-          obj[key.text_value]
+        results = []
+        traverse(objects) do |obj|
+          results << obj[key.text_value]
         end
+        results
       end
     end
     
     class IndexNode < PathNode
       def descend(*objects)
         offset = Integer(index.text_value)
-        objects.inject([]) do |results, obj|
+        results = []
+        traverse(objects) do |obj|
           if obj.size > offset
             results << obj[offset]
           end
-          results
         end
+        results
       end
     end
     
     class SliceNode < PathNode
             
       def descend(*objects)
-        objects.inject([]) do |results, obj|
+        results = []
+        traverse(objects) do |obj|
           (start_offset..stop_offset(obj)).step(step_size) do |n|
             if obj.size > n
               results << obj[n]
             end
           end
-          results
         end
+        results
       end
       
       def start_offset
@@ -107,10 +130,12 @@ module JSON
             
       def descend(*objects)
         code = template_code.text_value.gsub('@', '(obj)').gsub('\\(obj)', '@')
-        objects.map do |obj|
-          result = eval(code, binding)
-          obj[result]
+        results = []
+        traverse(objects) do |obj|
+          res = eval(code, binding)
+          results << obj[res]
         end
+        results
       end
     
     end
@@ -121,7 +146,8 @@ module JSON
       
       def descend(*objects)
         code = template_code.text_value.gsub('@', '(obj)').gsub('\\(obj)', '@')
-        objects.inject([]) do |results, set|
+        results = []
+        traverse(objects) do |set|
           unless set.is_a?(Array) || set.is_a?(Hash)
             raise Error, "Filters only work on arrays and hashes"
           end
@@ -131,8 +157,8 @@ module JSON
               results << obj
             end
           end
-          results
         end
+        results
       end
     
     end

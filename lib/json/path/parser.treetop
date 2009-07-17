@@ -16,23 +16,15 @@ grammar JSONPathGrammar
     '*' / '\'' '*' '\''
   end
   
-  rule subscript
-    '[' term ']'
-  end
-  
-  rule term
-    'x'
-  end
-  
   rule lower
-   '.' / '..'
+    '..' / '.'
   end
   
   rule child
-    # .foo
+    # .foo or ..foo
     lower key:bareword <JSON::Path::KeyNode>
     /
-    # .*
+    # .* or ..*
     lower wildcard <JSON::Path::WildcardNode>
     /
     # '?(@ % 2 == 0)'
