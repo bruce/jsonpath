@@ -5,11 +5,12 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "jsonpath"
-    gem.summary = %Q{TODO}
+    gem.summary = %Q{Add JSONPath support (drop-in for the JSON gem)}
     gem.email = "bruce@codefluency.com"
     gem.homepage = "http://github.com/bruce/jsonpath"
     gem.authors = ["Bruce Williams"]
-    # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
+    gem.add_dependency 'json'
+    # gem is a Gem::Specification... see http://  www.rubygems.org/read/chapter/20 for additional settings
   end
 
 rescue LoadError
@@ -53,4 +54,12 @@ Rake::RDocTask.new do |rdoc|
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
+
+file 'lib/json/path/parser.rb' => 'lib/json/path/parser.treetop' do |t|
+  sh "tt 'lib/json/path/parser.treetop'"
+end
+
+task :treetop => 'lib/json/path/parser.rb'
+
+
 
