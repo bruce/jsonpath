@@ -93,6 +93,17 @@ module JSON
       
     end
     
+    class FilterNode < Treetop::Runtime::SyntaxNode
+      
+      def descend(*objects)
+        code = template_code.text_value.gsub('@', 'obj')
+        objects.select do |obj|
+          eval(code, binding)
+        end
+      end
+    
+    end
+    
   end
   
 end

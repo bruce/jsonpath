@@ -31,6 +31,9 @@ grammar JSONPathGrammar
     # .*
     '.' wildcard <JSON::Path::WildcardNode>
     /
+    # '?(@ % 2 == 0)'
+    '.\'?(' template_code:(!')\'' . )+ ')\'' <JSON::Path::FilterNode>
+    /
     # .'foo'
     '.' '\'' key:(!'\'' . )+ '\'' <JSON::Path::KeyNode>
     /
@@ -51,6 +54,9 @@ grammar JSONPathGrammar
     /
     # [1::2]
     '[' start:number '::' step:number ']' <JSON::Path::SliceNode>
+    /
+    # [?(@ % 2 == 0)]
+    '[?(' template_code:(!')]' . )+ ')]' <JSON::Path::FilterNode>
     /
     # ['foo']
     '[' '\'' key:(!'\'' . )+ '\'' ']' <JSON::Path::KeyNode>

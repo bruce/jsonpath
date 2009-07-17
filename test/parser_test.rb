@@ -5,73 +5,51 @@ require File.dirname(__FILE__) << "/test_helper"
 class ParserTest < Test::Unit::TestCase
 
   context 'Traversing' do
-    setup { @parser = JSON::Path::Parser.new }
     context "hash" do
       should "parse bareword child with single terminal" do
-        assert_parses '$.a'
-        assert_kind_of Proc, parse('$.a').to_proc
-        assert_resolves({"a" => 1}, '$.a', [1])
+        path = '$.a'
+        assert_resolves({"a" => 1}, path, [1])
       end
       should "parse subscripted quoted child with single terminal" do
         path = "$['a b']"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves({"a b" => 1}, path, [1])
       end
       should "parse subscripted quoted child and chained bareword" do
         path = "$['a b'].c"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves({"a b" => {"c" => 1}}, path, [1])
       end
       should "parses bare wildcard" do
         path = "$.*"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves({"a" => 1, "b" => 2}, path, [1, 2])
       end
       should "parse quoted wildcard on hash" do
         path = "$['*']"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves({"a" => 1, "b" => 2}, path, [1, 2])
       end
       should "parse quoted key outside of brackets" do
         path = "$.'a b'"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves({"a b" => 1}, path, [1])
       end
     end
     context "array" do
       should "parse bare wildcard" do
         path = "$.*"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves([1, 2, 3], path, [1, 2, 3])
       end
       should "parses subscripted quoted wildcard" do
         path = "$['*']"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves([1, 2, 3], path, [1, 2, 3])
       end
       should "parses through bare wildcard" do
         path = "$.*.name"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves([{"name" => 1}, {"name" => 2}, {"name" => 3}], path, [1, 2, 3])
       end
       should "parse index to single terminal" do
         path = "$[1]"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves(%w(foo bar baz), path, %w(bar))
       end
       should "parse index to multiple terminals" do
         path = "$.*[1].name"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves({
           "a" => [1, {"name" => 2}, 3],
           "b" => [4, {"name" => 5}, 6],
@@ -82,8 +60,6 @@ class ParserTest < Test::Unit::TestCase
     context "combination wildcards" do
       should "parses through bare wildcard on array with additional wildcard" do
         path = "$.*.names.*"
-        assert_parses path
-        assert_kind_of Proc, parse(path).to_proc
         assert_resolves([
           {"names" => %w(foo bar)},
           {"names" => %w(baz quux)},
@@ -108,28 +84,20 @@ class ParserTest < Test::Unit::TestCase
         context "with implicit step" do
           should "parse to single terminal" do
             path = '$[2:4]'
-            assert_parses path
-            assert_kind_of Proc, parse(path).to_proc
             assert_resolves(@shallow, path, [3, 4, 5])
           end
           should "parse to multiple terminals" do
             path = '$[2:4].*.name'
-            assert_parses path
-            assert_kind_of Proc, parse(path).to_proc
             assert_resolves(@deep, path, %w(e1 f1 g1 h1 i1 j1))
           end
         end
         context "with explicit step" do
           should "parse to single terminal" do
             path = '$[2:4:2]'
-            assert_parses path
-            assert_kind_of Proc, parse(path).to_proc
             assert_resolves(@shallow, path, [3, 5])
           end
           should "parse to multiple terminals" do
             path = '$[2:4:2].*.name'
-            assert_parses path
-            assert_kind_of Proc, parse(path).to_proc
             assert_resolves(@deep, path, %w(e1 f1 i1 j1))
           end
         end
@@ -138,49 +106,47 @@ class ParserTest < Test::Unit::TestCase
         context "with implicit step" do
           should "parse to single terminal" do
             path = '$[2:]'
-            assert_parses path
-            assert_kind_of Proc, parse(path).to_proc
             assert_resolves(@shallow, path, [3, 4, 5, 6])
           end
           should "parse to multiple terminals" do
             path = '$[2:].*.name'
-            assert_parses path
-            assert_kind_of Proc, parse(path).to_proc
             assert_resolves(@deep, path, %w(e1 f1 g1 h1 i1 j1 k1 l1 m1 n1))
           end
         end
         context "with explicit step" do
            should "parse to single terminal" do
              path = '$[2::2]'
-             assert_parses path
-             assert_kind_of Proc, parse(path).to_proc
              assert_resolves(@shallow, path, [3, 5])
            end
            should "parse to multiple terminals" do
              path = '$[2::2].*.name'
-             assert_parses path
-             assert_kind_of Proc, parse(path).to_proc
              assert_resolves(@deep, path, %w(e1 f1 i1 j1 m1 n1))
            end
          end
       end
     end
+    context "supporting filters in Ruby" do
+      setup do
+        @numbers = [1, 2, 3, 4, 5, 6, 7, 8]
+        @hashes = [
+          {"name" => 'Bruce', "age" => 29},
+          {"name" => "Braedyn", "age" => 3},
+          {"name" => "Jamis", "age" => 2},
+        ]
+      end
+      context "when using self-contained single statements" do
+        should "support simple object operations" do
+          path = '$.*[?(@ % 2 == 0)]'
+          assert_resolves(@numbers, path, [2, 4, 6, 8])
+        end
+        should "support manual object pathing" do
+          path = %($.*[?(@['age'] % 2 == 0)].name)
+          assert_resolves(@hashes, path, ["Jamis"])
+        end
+      end
+      
+    end
     
-  end
-  
-  private
-  
-  def parse(path)
-    @parser.parse(path)
-  end
-  
-  def assert_parses(path)
-    result = parse(path)
-    assert result, @parser.inspect
-  end
-  
-  def assert_resolves(obj, path, result)
-    assert_equal result.sort, parse(path).to_proc.call(obj).sort
   end
     
 end
