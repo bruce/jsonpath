@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name = %q{jsonpath}
-  s.version = "0.8.0"
+  s.version = "0.8.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Bruce Williams"]
@@ -19,6 +19,7 @@ Gem::Specification.new do |s|
      "README.markdown",
      "Rakefile",
      "VERSION",
+     "jsonpath.gemspec",
      "lib/jsonpath.rb",
      "lib/jsonpath/nodes.rb",
      "lib/jsonpath/parser.rb",
