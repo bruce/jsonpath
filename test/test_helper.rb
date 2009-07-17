@@ -20,7 +20,7 @@ class Test::Unit::TestCase
   
   def assert_parses(path)
     result = parse(path)
-    assert result, parser.inspect
+    assert result, parser.failure_reason
   end
   
   def assert_resolves(obj, path, result)

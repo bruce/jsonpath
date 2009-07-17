@@ -105,10 +105,9 @@ module JSON
         results = []
         traverse(objects) do |obj|
           if obj.is_a?(Array)
-            (start_offset..stop_offset(obj)).step(step_size) do |n|
-              if obj.size > n
-                results << obj[n]
-              end
+            values = obj[start_offset..stop_offset(obj)]
+            0.step(values.size - 1, step_size) do |n|
+              results << values[n]
             end
           end
         end
@@ -157,7 +156,7 @@ module JSON
       def descend(*objects)
         results = []
         traverse(objects) do |obj|
-          res = execute[obj]
+          res = execute(obj)
           case obj
           when Hash
             next unless obj.key?(res)

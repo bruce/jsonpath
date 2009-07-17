@@ -78,6 +78,9 @@ module JSONPathGrammar
     return r0
   end
 
+  module Number0
+  end
+
   def _nt_number
     start_index = index
     if node_cache[:number].has_key?(index)
@@ -86,25 +89,49 @@ module JSONPathGrammar
       return cached
     end
 
-    s0, i0 = [], index
-    loop do
-      if input.index(Regexp.new('[0-9]'), index) == index
-        r1 = instantiate_node(SyntaxNode,input, index...(index + 1))
-        @index += 1
-      else
-        r1 = nil
-      end
-      if r1
-        s0 << r1
-      else
-        break
-      end
+    i0, s0 = index, []
+    if input.index('-', index) == index
+      r2 = instantiate_node(SyntaxNode,input, index...(index + 1))
+      @index += 1
+    else
+      terminal_parse_failure('-')
+      r2 = nil
     end
-    if s0.empty?
+    if r2
+      r1 = r2
+    else
+      r1 = instantiate_node(SyntaxNode,input, index...index)
+    end
+    s0 << r1
+    if r1
+      s3, i3 = [], index
+      loop do
+        if input.index(Regexp.new('[0-9]'), index) == index
+          r4 = instantiate_node(SyntaxNode,input, index...(index + 1))
+          @index += 1
+        else
+          r4 = nil
+        end
+        if r4
+          s3 << r4
+        else
+          break
+        end
+      end
+      if s3.empty?
+        self.index = i3
+        r3 = nil
+      else
+        r3 = instantiate_node(SyntaxNode,input, i3...index, s3)
+      end
+      s0 << r3
+    end
+    if s0.last
+      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
+      r0.extend(Number0)
+    else
       self.index = i0
       r0 = nil
-    else
-      r0 = instantiate_node(SyntaxNode,input, i0...index, s0)
     end
 
     node_cache[:number][start_index] = r0
