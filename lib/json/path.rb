@@ -58,6 +58,41 @@ module JSON
       end
     end
     
+    class SliceNode < Treetop::Runtime::SyntaxNode
+            
+      def descend(*objects)
+        objects.inject([]) do |results, obj|
+          (start_offset..stop_offset(obj)).step(step_size) do |n|
+            if obj.size > n
+              results << obj[n]
+            end
+          end
+          results
+        end
+      end
+      
+      def start_offset
+        @start_offset ||= Integer(start.text_value)
+      end
+      
+      def stop_offset(obj)
+        @stop_offset ||= if respond_to?(:stop)
+          Integer(stop.text_value)
+        else
+          obj.size
+        end
+      end
+      
+      def step_size
+        @step_size ||= if respond_to?(:step)
+          Integer(step.text_value)
+        else
+          1
+        end
+      end
+      
+    end
+    
   end
   
 end

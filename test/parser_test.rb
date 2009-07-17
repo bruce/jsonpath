@@ -85,6 +85,80 @@ class ParserTest < Test::Unit::TestCase
         "c" => [7, {"name" => 8}, 9],
       }, path, [2, 5, 8])
     end
+    context "using slices" do
+      setup {
+        @deep = [
+          {"a" => {"name" => "a1"}, "b" => {"name" => "b1"}},
+          {"c" => {"name" => "c1"}, "d" => {"name" => "d1"}},
+          {"e" => {"name" => "e1"}, "f" => {"name" => "f1"}},
+          {"g" => {"name" => "g1"}, "h" => {"name" => "h1"}},
+          {"i" => {"name" => "i1"}, "j" => {"name" => "j1"}},
+          {"k" => {"name" => "k1"}, "l" => {"name" => "l1"}},
+          {"m" => {"name" => "m1"}, "n" => {"name" => "n1"}},          
+        ]
+        @shallow = [1, 2, 3, 4, 5, 6]
+      }
+      context "with explicit start and stop" do
+        context "with implicit step" do
+          should "parse to single terminal" do
+            path = '$[2:4]'
+            assert_parses path
+            assert_kind_of Proc, parse(path).to_proc
+            assert_resolves(@shallow, path, [3, 4, 5])
+          end
+          should "parse to multiple terminals" do
+            path = '$[2:4].*.name'
+            assert_parses path
+            assert_kind_of Proc, parse(path).to_proc
+            assert_resolves(@deep, path, %w(e1 f1 g1 h1 i1 j1))
+          end
+        end
+        context "with explicit step" do
+          should "parse to single terminal" do
+            path = '$[2:4:2]'
+            assert_parses path
+            assert_kind_of Proc, parse(path).to_proc
+            assert_resolves(@shallow, path, [3, 5])
+          end
+          should "parse to multiple terminals" do
+            path = '$[2:4:2].*.name'
+            assert_parses path
+            assert_kind_of Proc, parse(path).to_proc
+            assert_resolves(@deep, path, %w(e1 f1 i1 j1))
+          end
+        end
+      end
+      context "with explicit start and implict stop" do
+        context "with implicit step" do
+          should "parse to single terminal" do
+            path = '$[2:]'
+            assert_parses path
+            assert_kind_of Proc, parse(path).to_proc
+            assert_resolves(@shallow, path, [3, 4, 5, 6])
+          end
+          should "parse to multiple terminals" do
+            path = '$[2:].*.name'
+            assert_parses path
+            assert_kind_of Proc, parse(path).to_proc
+            assert_resolves(@deep, path, %w(e1 f1 g1 h1 i1 j1 k1 l1 m1 n1))
+          end
+        end
+        context "with explicit step" do
+           should "parse to single terminal" do
+             path = '$[2::2]'
+             assert_parses path
+             assert_kind_of Proc, parse(path).to_proc
+             assert_resolves(@shallow, path, [3, 5])
+           end
+           should "parse to multiple terminals" do
+             path = '$[2::2].*.name'
+             assert_parses path
+             assert_kind_of Proc, parse(path).to_proc
+             assert_resolves(@deep, path, %w(e1 f1 i1 j1 m1 n1))
+           end
+         end
+      end
+    end
     
   end
   

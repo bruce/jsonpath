@@ -40,6 +40,18 @@ grammar JSONPathGrammar
     # [0]
     '[' index:number ']' <JSON::Path::IndexNode>
     /
+    # [1:2]
+    '[' start:number ':' stop:number ']' <JSON::Path::SliceNode>
+    /
+    # [1:]
+    '[' start:number ':]' <JSON::Path::SliceNode>
+    /
+    # [1:4:2]
+    '[' start:number ':' stop:number ':' step:number ']' <JSON::Path::SliceNode>
+    /
+    # [1::2]
+    '[' start:number '::' step:number ']' <JSON::Path::SliceNode>
+    /
     # ['foo']
     '[' '\'' key:(!'\'' . )+ '\'' ']' <JSON::Path::KeyNode>
   end
