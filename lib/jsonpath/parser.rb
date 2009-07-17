@@ -45,7 +45,7 @@ module JSONPathGrammar
       s0 << r2
     end
     if s0.last
-      r0 = instantiate_node(JSON::Path::RootNode,input, i0...index, s0)
+      r0 = instantiate_node(JSONPath::Nodes::RootNode,input, i0...index, s0)
       r0.extend(Path0)
     else
       self.index = i0
@@ -703,7 +703,7 @@ module JSONPathGrammar
       s1 << r3
     end
     if s1.last
-      r1 = instantiate_node(JSON::Path::KeyNode,input, i1...index, s1)
+      r1 = instantiate_node(JSONPath::Nodes::KeyNode,input, i1...index, s1)
       r1.extend(Child0)
     else
       self.index = i1
@@ -720,7 +720,7 @@ module JSONPathGrammar
         s4 << r6
       end
       if s4.last
-        r4 = instantiate_node(JSON::Path::WildcardNode,input, i4...index, s4)
+        r4 = instantiate_node(JSONPath::Nodes::WildcardNode,input, i4...index, s4)
         r4.extend(Child1)
       else
         self.index = i4
@@ -803,7 +803,7 @@ module JSONPathGrammar
           end
         end
         if s7.last
-          r7 = instantiate_node(JSON::Path::FilterNode,input, i7...index, s7)
+          r7 = instantiate_node(JSONPath::Nodes::FilterNode,input, i7...index, s7)
           r7.extend(Child3)
         else
           self.index = i7
@@ -886,7 +886,7 @@ module JSONPathGrammar
             end
           end
           if s16.last
-            r16 = instantiate_node(JSON::Path::KeyNode,input, i16...index, s16)
+            r16 = instantiate_node(JSONPath::Nodes::KeyNode,input, i16...index, s16)
             r16.extend(Child5)
           else
             self.index = i16
@@ -919,7 +919,7 @@ module JSONPathGrammar
               end
             end
             if s25.last
-              r25 = instantiate_node(JSON::Path::WildcardNode,input, i25...index, s25)
+              r25 = instantiate_node(JSONPath::Nodes::WildcardNode,input, i25...index, s25)
               r25.extend(Child6)
             else
               self.index = i25
@@ -952,7 +952,7 @@ module JSONPathGrammar
                 end
               end
               if s29.last
-                r29 = instantiate_node(JSON::Path::IndexNode,input, i29...index, s29)
+                r29 = instantiate_node(JSONPath::Nodes::IndexNode,input, i29...index, s29)
                 r29.extend(Child7)
               else
                 self.index = i29
@@ -989,7 +989,7 @@ module JSONPathGrammar
                   end
                 end
                 if s33.last
-                  r33 = instantiate_node(JSON::Path::IndexNode,input, i33...index, s33)
+                  r33 = instantiate_node(JSONPath::Nodes::IndexNode,input, i33...index, s33)
                   r33.extend(Child8)
                 else
                   self.index = i33
@@ -1036,7 +1036,7 @@ module JSONPathGrammar
                     end
                   end
                   if s38.last
-                    r38 = instantiate_node(JSON::Path::SliceNode,input, i38...index, s38)
+                    r38 = instantiate_node(JSONPath::Nodes::SliceNode,input, i38...index, s38)
                     r38.extend(Child9)
                   else
                     self.index = i38
@@ -1087,7 +1087,7 @@ module JSONPathGrammar
                       end
                     end
                     if s44.last
-                      r44 = instantiate_node(JSON::Path::SliceNode,input, i44...index, s44)
+                      r44 = instantiate_node(JSONPath::Nodes::SliceNode,input, i44...index, s44)
                       r44.extend(Child10)
                     else
                       self.index = i44
@@ -1120,7 +1120,7 @@ module JSONPathGrammar
                         end
                       end
                       if s51.last
-                        r51 = instantiate_node(JSON::Path::SliceNode,input, i51...index, s51)
+                        r51 = instantiate_node(JSONPath::Nodes::SliceNode,input, i51...index, s51)
                         r51.extend(Child11)
                       else
                         self.index = i51
@@ -1157,7 +1157,7 @@ module JSONPathGrammar
                           end
                         end
                         if s55.last
-                          r55 = instantiate_node(JSON::Path::SliceNode,input, i55...index, s55)
+                          r55 = instantiate_node(JSONPath::Nodes::SliceNode,input, i55...index, s55)
                           r55.extend(Child12)
                         else
                           self.index = i55
@@ -1218,7 +1218,7 @@ module JSONPathGrammar
                             end
                           end
                           if s60.last
-                            r60 = instantiate_node(JSON::Path::SliceNode,input, i60...index, s60)
+                            r60 = instantiate_node(JSONPath::Nodes::SliceNode,input, i60...index, s60)
                             r60.extend(Child13)
                           else
                             self.index = i60
@@ -1283,7 +1283,7 @@ module JSONPathGrammar
                               end
                             end
                             if s68.last
-                              r68 = instantiate_node(JSON::Path::SliceNode,input, i68...index, s68)
+                              r68 = instantiate_node(JSONPath::Nodes::SliceNode,input, i68...index, s68)
                               r68.extend(Child14)
                             else
                               self.index = i68
@@ -1330,7 +1330,7 @@ module JSONPathGrammar
                                 end
                               end
                               if s77.last
-                                r77 = instantiate_node(JSON::Path::SliceNode,input, i77...index, s77)
+                                r77 = instantiate_node(JSONPath::Nodes::SliceNode,input, i77...index, s77)
                                 r77.extend(Child15)
                               else
                                 self.index = i77
@@ -1381,7 +1381,7 @@ module JSONPathGrammar
                                   end
                                 end
                                 if s83.last
-                                  r83 = instantiate_node(JSON::Path::SliceNode,input, i83...index, s83)
+                                  r83 = instantiate_node(JSONPath::Nodes::SliceNode,input, i83...index, s83)
                                   r83.extend(Child16)
                                 else
                                   self.index = i83
@@ -1460,7 +1460,7 @@ module JSONPathGrammar
                                     end
                                   end
                                   if s90.last
-                                    r90 = instantiate_node(JSON::Path::ExprNode,input, i90...index, s90)
+                                    r90 = instantiate_node(JSONPath::Nodes::ExprNode,input, i90...index, s90)
                                     r90.extend(Child18)
                                   else
                                     self.index = i90
@@ -1543,7 +1543,7 @@ module JSONPathGrammar
                                       end
                                     end
                                     if s98.last
-                                      r98 = instantiate_node(JSON::Path::ExprNode,input, i98...index, s98)
+                                      r98 = instantiate_node(JSONPath::Nodes::ExprNode,input, i98...index, s98)
                                       r98.extend(Child20)
                                     else
                                       self.index = i98
@@ -1622,7 +1622,7 @@ module JSONPathGrammar
                                         end
                                       end
                                       if s107.last
-                                        r107 = instantiate_node(JSON::Path::FilterNode,input, i107...index, s107)
+                                        r107 = instantiate_node(JSONPath::Nodes::FilterNode,input, i107...index, s107)
                                         r107.extend(Child22)
                                       else
                                         self.index = i107
@@ -1705,7 +1705,7 @@ module JSONPathGrammar
                                           end
                                         end
                                         if s115.last
-                                          r115 = instantiate_node(JSON::Path::FilterNode,input, i115...index, s115)
+                                          r115 = instantiate_node(JSONPath::Nodes::FilterNode,input, i115...index, s115)
                                           r115.extend(Child24)
                                         else
                                           self.index = i115
@@ -1738,7 +1738,7 @@ module JSONPathGrammar
                                             end
                                           end
                                           if s124.last
-                                            r124 = instantiate_node(JSON::Path::KeyNode,input, i124...index, s124)
+                                            r124 = instantiate_node(JSONPath::Nodes::KeyNode,input, i124...index, s124)
                                             r124.extend(Child25)
                                           else
                                             self.index = i124
@@ -1775,7 +1775,7 @@ module JSONPathGrammar
                                               end
                                             end
                                             if s128.last
-                                              r128 = instantiate_node(JSON::Path::KeyNode,input, i128...index, s128)
+                                              r128 = instantiate_node(JSONPath::Nodes::KeyNode,input, i128...index, s128)
                                               r128.extend(Child26)
                                             else
                                               self.index = i128

@@ -1,0 +1,106 @@
+grammar JSONPathGrammar
+
+  rule path
+    root selectors:child+ <JSONPath::Nodes::RootNode>
+  end
+
+  rule root
+    '$'
+  end
+  
+  rule number
+    '-'? [0-9]+
+  end
+  
+  rule wildcard
+    '*' / '\'' '*' '\''
+  end
+  
+  rule lower
+    descendant / '.'
+  end
+  
+  rule descendant
+    '..'
+  end
+  
+  rule word_list
+    quoted_word ',' ' '*  word_list
+    /
+    quoted_word
+  end
+  
+  rule quoted_word
+    '\'' key:(!'\'' . )+ '\''
+  end
+  
+  rule child
+    # .foo or ..foo
+    lower key:bareword <JSONPath::Nodes::KeyNode>
+    /
+    # .* or ..*
+    lower wildcard <JSONPath::Nodes::WildcardNode>
+    /
+    # '?(@ % 2 == 0)'
+    lower '\'?(' template_code:(!')\'' . )+ ')\'' <JSONPath::Nodes::FilterNode>
+    /
+    # .'foo'
+    lower '\'' key:(!'\'' . )+ '\'' <JSONPath::Nodes::KeyNode>
+    /
+    # [*] and ['*']
+    '[' wildcard ']' <JSONPath::Nodes::WildcardNode>
+    /
+    # [0]
+    '[' index:number ']' <JSONPath::Nodes::IndexNode>
+    /
+    # .[0] and ..[0]
+    lower '[' index:number ']' <JSONPath::Nodes::IndexNode>
+    /
+    # [1:2]
+    '[' start:number ':' stop:number ']' <JSONPath::Nodes::SliceNode>
+    /
+    # .[1:2] and ..[1:2]
+    lower '[' start:number ':' stop:number ']' <JSONPath::Nodes::SliceNode>  
+    /
+    # [1:]
+    '[' start:number ':]' <JSONPath::Nodes::SliceNode>
+    /
+    # .[1:] and ..[1:]
+    lower '[' start:number ':]' <JSONPath::Nodes::SliceNode>
+    /
+    # [1:4:2]
+    '[' start:number ':' stop:number ':' step:number ']' <JSONPath::Nodes::SliceNode>
+    /
+    # .[1:4:2] and ..[1:4:2]
+    lower '[' start:number ':' stop:number ':' step:number ']' <JSONPath::Nodes::SliceNode>
+    /
+    # [1::2]
+    '[' start:number '::' step:number ']' <JSONPath::Nodes::SliceNode>
+    /
+    # .[1::2] and ..[1::2]
+    lower '[' start:number '::' step:number ']' <JSONPath::Nodes::SliceNode>
+    /    
+    # [(@.length - 1)]
+    '[(' template_code:(!')]' . )+ ')]' <JSONPath::Nodes::ExprNode>
+    /
+    # .[(@.length - 1)] and ..[(@.length - 1)]
+    lower '[(' template_code:(!')]' . )+ ')]' <JSONPath::Nodes::ExprNode>
+    /
+    # [?(@ % 2 == 0)]
+    '[?(' template_code:(!')]' . )+ ')]' <JSONPath::Nodes::FilterNode>
+    /
+    # .[?(@ % 2 == 0)] and ..[?(@ % 2 == 0)]
+    lower '[?(' template_code:(!')]' . )+ ')]' <JSONPath::Nodes::FilterNode>
+    /    
+    # ['foo']
+    '[' word_list ']' <JSONPath::Nodes::KeyNode>
+    /    
+    # .['foo'] and ..['foo]
+    lower '[' word_list ']' <JSONPath::Nodes::KeyNode>
+  end
+  
+  rule bareword
+    [a-zA-Z0-9]+
+  end
+
+end

@@ -11,7 +11,7 @@ class Test::Unit::TestCase
   private
   
   def parser
-    @parser ||= JSON::Path::Parser.new
+    @parser ||= JSONPath::Parser.new
   end
   
   def parse(path)
@@ -25,7 +25,7 @@ class Test::Unit::TestCase
   
   def assert_resolves(obj, path, result)
     assert_parses path
-    assert_equal safe_sort(result), safe_sort(parse(path).to_proc.call(obj))
+    assert_equal safe_sort(result), safe_sort(parse(path).walk(obj))
   end
   
   def safe_sort(objs)
