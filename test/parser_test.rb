@@ -164,6 +164,10 @@ class ParserTest < Test::Unit::TestCase
         path = '$..e'
         assert_resolves(@object, path, [[6, 7]])
       end
+      should "be found with deeper index" do
+        path = '$..[0]'
+        assert_resolves(@object, path, [1, 3, 6])
+      end
       should "resolve deeper chained selectors" do
         path = '$..e[?(@ % 2 == 0)]'
         assert_resolves(@object, path, [6])

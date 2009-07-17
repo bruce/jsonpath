@@ -90,7 +90,7 @@ class ReferenceTest < Test::Unit::TestCase
       assert_resolves(object, "$..[-1:]", [4, 8])
     end
     should 'resolve by descendant value' do
-      assert_resolves(object, "$..[?(@%2==0)]", [2, 4, 6, 8])
+      assert_resolves(object, "$..[?(@.is_a?(Numeric) && @ % 2 == 0)]", [2, 4, 6, 8])
     end
   end
   context 'Sample 6' do

@@ -26,11 +26,17 @@ module JSON
     
     class PathNode < Treetop::Runtime::SyntaxNode
       
+      def traversing_descendants?
+        respond_to?(:lower) && lower.text_value == '..'
+      end
+      
       def traverse(obj, &block)
         if !respond_to?(:lower) || lower.text_value == '.'
           obj.each(&block)
         elsif lower.text_value == '..'
-          recurse(obj, &block)
+          obj.each do |o|
+            recurse(o, &block)
+          end
         end
       end
       
@@ -64,6 +70,9 @@ module JSON
             next
           end
           results.push(*values)
+          if obj.is_a?(Hash) && traversing_descendants?
+            results.push(obj) unless results.include?(obj)
+          end
         end
         results
       end
@@ -162,6 +171,8 @@ module JSON
             next unless obj.key?(res)
           when Array
             next unless obj.size > res
+          else
+            next
           end
           results << obj[res]
         end
@@ -177,9 +188,7 @@ module JSON
       def descend(*objects)
         results = []
         traverse(objects) do |set|
-          unless set.is_a?(Array) || set.is_a?(Hash)
-            raise Error, "Filters only work on arrays and hashes"
-          end
+          next unless set.is_a?(Array) || set.is_a?(Hash)
           values = set.is_a?(Array) ? set : set.values
           values.each do |obj|
             if execute(obj)

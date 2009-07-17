@@ -43,26 +43,50 @@ grammar JSONPathGrammar
     # [0]
     '[' index:number ']' <JSON::Path::IndexNode>
     /
+    # .[0] and ..[0]
+    lower '[' index:number ']' <JSON::Path::IndexNode>
+    /
     # [1:2]
     '[' start:number ':' stop:number ']' <JSON::Path::SliceNode>
+    /
+    # .[1:2] and ..[1:2]
+    lower '[' start:number ':' stop:number ']' <JSON::Path::SliceNode>  
     /
     # [1:]
     '[' start:number ':]' <JSON::Path::SliceNode>
     /
+    # .[1:] and ..[1:]
+    lower '[' start:number ':]' <JSON::Path::SliceNode>
+    /
     # [1:4:2]
     '[' start:number ':' stop:number ':' step:number ']' <JSON::Path::SliceNode>
+    /
+    # .[1:4:2] and ..[1:4:2]
+    lower '[' start:number ':' stop:number ':' step:number ']' <JSON::Path::SliceNode>
     /
     # [1::2]
     '[' start:number '::' step:number ']' <JSON::Path::SliceNode>
     /
+    # .[1::2] and ..[1::2]
+    lower '[' start:number '::' step:number ']' <JSON::Path::SliceNode>
+    /    
     # [(@.length - 1)]
     '[(' template_code:(!')]' . )+ ')]' <JSON::Path::ExprNode>
+    /
+    # .[(@.length - 1)] and ..[(@.length - 1)]
+    lower '[(' template_code:(!')]' . )+ ')]' <JSON::Path::ExprNode>
     /
     # [?(@ % 2 == 0)]
     '[?(' template_code:(!')]' . )+ ')]' <JSON::Path::FilterNode>
     /
+    # .[?(@ % 2 == 0)] and ..[?(@ % 2 == 0)]
+    lower '[?(' template_code:(!')]' . )+ ')]' <JSON::Path::FilterNode>
+    /    
     # ['foo']
     '[' '\'' key:(!'\'' . )+ '\'' ']' <JSON::Path::KeyNode>
+    /    
+    # .['foo'] and ..['foo]
+    lower '[' '\'' key:(!'\'' . )+ '\'' ']' <JSON::Path::KeyNode>
   end
   
   rule bareword
