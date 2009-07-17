@@ -4,86 +4,92 @@ require File.dirname(__FILE__) << "/test_helper"
 # reference implementations at http://code.google.com/p/jsonpath/ 
 class ParserTest < Test::Unit::TestCase
 
-  context 'Simple' do
+  context 'Traversing' do
     setup { @parser = JSON::Path::Parser.new }
-    should "parse successfully" do
-      assert_parses '$.a'
-      assert_kind_of Proc, parse('$.a').to_proc
-      assert_resolves({"a" => 1}, '$.a', [1])
+    context "hash" do
+      should "parse bareword child with single terminal" do
+        assert_parses '$.a'
+        assert_kind_of Proc, parse('$.a').to_proc
+        assert_resolves({"a" => 1}, '$.a', [1])
+      end
+      should "parse subscripted quoted child with single terminal" do
+        path = "$['a b']"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves({"a b" => 1}, path, [1])
+      end
+      should "parse subscripted quoted child and chained bareword" do
+        path = "$['a b'].c"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves({"a b" => {"c" => 1}}, path, [1])
+      end
+      should "parses bare wildcard" do
+        path = "$.*"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves({"a" => 1, "b" => 2}, path, [1, 2])
+      end
+      should "parse quoted wildcard on hash" do
+        path = "$['*']"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves({"a" => 1, "b" => 2}, path, [1, 2])
+      end
+      should "parse quoted key outside of brackets" do
+        path = "$.'a b'"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves({"a b" => 1}, path, [1])
+      end
     end
-    should "parse subscript with quotes successfully" do
-      path = "$['a b']"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves({"a b" => 1}, path, [1])
+    context "array" do
+      should "parse bare wildcard" do
+        path = "$.*"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves([1, 2, 3], path, [1, 2, 3])
+      end
+      should "parses subscripted quoted wildcard" do
+        path = "$['*']"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves([1, 2, 3], path, [1, 2, 3])
+      end
+      should "parses through bare wildcard" do
+        path = "$.*.name"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves([{"name" => 1}, {"name" => 2}, {"name" => 3}], path, [1, 2, 3])
+      end
+      should "parse index to single terminal" do
+        path = "$[1]"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves(%w(foo bar baz), path, %w(bar))
+      end
+      should "parse index to multiple terminals" do
+        path = "$.*[1].name"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves({
+          "a" => [1, {"name" => 2}, 3],
+          "b" => [4, {"name" => 5}, 6],
+          "c" => [7, {"name" => 8}, 9],
+        }, path, [2, 5, 8])
+      end
     end
-    should "parse simple chained selectors with one terminal" do
-      path = "$['a b'].c"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves({"a b" => {"c" => 1}}, path, [1])
-    end
-    should "parses bare wildcard on hash" do
-      path = "$.*"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves({"a" => 1, "b" => 2}, path, [1, 2])
-    end
-    should "parses bare wildcard on array" do
-      path = "$.*"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves([1, 2, 3], path, [1, 2, 3])
-    end
-    should "parses quoted wildcard on hash" do
-      path = "$['*']"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves({"a" => 1, "b" => 2}, path, [1, 2])
-    end
-    should "parses quoted wildcard on array" do
-      path = "$['*']"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves([1, 2, 3], path, [1, 2, 3])
-    end
-    should "parses through bare wildcard on array" do
-      path = "$.*.name"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves([{"name" => 1}, {"name" => 2}, {"name" => 3}], path, [1, 2, 3])
-    end
-    should "parses through bare wildcard on array with additional wildcard" do
-      path = "$.*.names.*"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves([
-        {"names" => %w(foo bar)},
-        {"names" => %w(baz quux)},
-        {"names" => %w(spam eggs)}
-      ], path, %w(foo bar baz quux spam eggs))
-    end
-    should "parse quoted key outside of brackets" do
-      path = "$.'a b'"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves({"a b" => 1}, path, [1])
-    end
-    should "parse index to single terminal" do
-      path = "$[1]"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves(%w(foo bar baz), path, %w(bar))
-    end
-    should "parse index to multiple terminals" do
-      path = "$.*[1].name"
-      assert_parses path
-      assert_kind_of Proc, parse(path).to_proc
-      assert_resolves({
-        "a" => [1, {"name" => 2}, 3],
-        "b" => [4, {"name" => 5}, 6],
-        "c" => [7, {"name" => 8}, 9],
-      }, path, [2, 5, 8])
+    context "combination wildcards" do
+      should "parses through bare wildcard on array with additional wildcard" do
+        path = "$.*.names.*"
+        assert_parses path
+        assert_kind_of Proc, parse(path).to_proc
+        assert_resolves([
+          {"names" => %w(foo bar)},
+          {"names" => %w(baz quux)},
+          {"names" => %w(spam eggs)}
+        ], path, %w(foo bar baz quux spam eggs))
+      end
     end
     context "using slices" do
       setup {
