@@ -198,8 +198,11 @@ module JSONPath
           next unless set.is_a?(Array) || set.is_a?(Hash)
           values = set.is_a?(Array) ? set : set.values
           values.each do |obj|
-            if execute(obj)
-              results << obj
+            begin
+              if execute(obj)
+                results << obj
+              end
+            rescue
             end
           end
         end
